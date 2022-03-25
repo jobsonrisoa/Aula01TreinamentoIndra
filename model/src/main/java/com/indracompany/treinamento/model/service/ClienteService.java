@@ -3,6 +3,8 @@ package com.indracompany.treinamento.model.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.indracompany.treinamento.util.NomeUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import com.indracompany.treinamento.exception.AplicacaoException;
@@ -37,4 +39,27 @@ public class ClienteService extends GenericCrudService<Cliente, Long, ClienteRep
 		  }
 		  return retorno;
 	  }
+
+	public List<ClienteDTO> buscarClientePorNome(String nome) {
+		boolean nomeValido = NomeUtil.validaNome(nome);
+
+		if (!nomeValido) {
+			throw new AplicacaoException(ExceptionValidacoes.ERRO_NOME_INVALIDO);
+		}
+
+		List<Cliente> clientes = repository.findByNomeStartsWith(nome);
+
+		if (clientes == null || clientes.isEmpty()) {
+			throw new AplicacaoException(ExceptionValidacoes.ALERTA_NENHUM_REGISTRO_ENCONTRADO);
+		}
+
+		List<ClienteDTO> retorno = new ArrayList<ClienteDTO>();
+		for (Cliente c: clientes) {
+			ClienteDTO dto = new ClienteDTO();
+			dto.setEmail(c.getEmail());
+			dto.setNome(c.getNome());
+			retorno.add(dto);
+		}
+		return retorno;
+	}
 }
